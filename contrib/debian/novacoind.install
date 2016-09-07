@@ -1,0 +1,2 @@
+debian/bin/FedoraShared usr/bin
+src/FedoraShared usr/lib/FedoraShare

@@ -1,0 +1,5 @@
+FedoraShare-qt usr/bin
+share/pixmaps/FedoraShare32.xpm usr/share/pixmaps
+share/pixmaps/FedoraShare80.xpm usr/share/pixmaps
+debian/FedoraShare-qt.desktop usr/share/applications
+debian/FedoraShare-qt.protocol usr/share/kde4/services/

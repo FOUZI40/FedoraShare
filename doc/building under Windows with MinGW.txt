@@ -1,0 +1,506 @@
+﻿32 bit:
+1. Preparing the system.
+
+1.1 Installing 7z archiver: http://www.7-zip.org/
+(When writing instructions used 7-Zip 9.20 64 bit X64, but most likely any version will do)
+
+1.2 Installation msys shell:
+-Download http://sourceforge.net/projects/mingw/files/Installer/mingw-get-setup.exe/download
+-Press Install
+-Director to install C: \ MinGW
+-postavit tick "... also install support for the graphical user interface."
+-Removed checkmark "..in the start menu, and / or .." "... on the desktop"
+-Press continue
+-Press continue
+-Press All Packages, then MSYS
+-postavte checkmark:
+msys-autoconf-bin
+msys-automake-bin
+msys-base-bin
+msys-libtool-bin
+-Press Installation, Apply Changes, Apply. After installation is complete, click Close, and close the MinGW Installation Manager.
+
+1.3 Installing MinGW-builds project toolchain:
+download http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.9.2/threads-posix/dwarf/i686-4.9.2-release-posix-dwarf-rt_v3-rev0.7z/download
+and unzip to C: \
+
+1.4 Add to the PATH the path C: \ mingw32 \ bin;
+A detailed description of how to do this on Windows 8, Windows 7, Windows XP and Windows Vista
+https://www.java.com/ru/download/help/path.xml
+(Just do not need to perform the last paragraph of this statement, "Open a command prompt again and run the java code.")
+
+Check that you did everything right:
+1) C: \ MinGW \ bin should contain only mingw-get.exe file
+2) Open the Command Prompt (Press Windows R button at the same time. This will open the window "Run" in the Open box, type the cmd. Click the Ok). Type gcc -v. At the command prompt will be printed text. At the end of the text should be written:
+Thread model: posix
+gcc version 4.9.2 (i686-posix-dwarf-rev0, Built by MinGW-W64 project)
+
+2. Building dependency.
+The instruction dependencies are stored in the folder c: \ deps
+
+2.1 OpenSSL
+-Download https://openssl.org/source/openssl-1.0.2.tar.gz
+-Browse In the folder C: \ MinGW \ msys \ 1.0 and run msys.bat
+From MinGw shell run the following code:
+
+cd / c / deps /
+tar xvfz openssl-1.0.2.tar.gz
+cd openssl-1.0.2
+Configure no-shared no-dso mingw
+make
+
+2.2 Berkeley DB
+-Download http://download.oracle.com/berkeley-db/db-6.0.20.tar.gz
+-From MinGw shell run the following code:
+
+cd / c / deps /
+tar xvfz db-6.0.20.tar.gz
+cd db-6.0.20 / build_unix
+../dist/configure --enable-mingw --enable-cxx --disable-shared --disable-replication
+make
+
+2.3 Boost
+-Download http://sourceforge.net/projects/boost/files/boost/1.57.0/boost_1_57_0.7z/download
+-Raspakuyte Boost_1_57_0.7z in the folder C: \ deps
+-Open A Windows command prompt and run the following code:
+
+cd C: \ deps \ boost_1_57_0 \
+bootstrap.bat mingw
+b2 --build-type = complete --with-chrono --with-filesystem --with-program_options --with-system --with-thread toolset = gcc variant = release link = static threading = multi runtime-link = static stage
+
+2.4 qrencode
+-Download http://download.sourceforge.net/libpng/libpng-1.6.15.tar.gz?download
+-Raspakuyte
+-Open MinGw shell (C: \ MinGW \ msys \ 1.0 \ msys.bat) and run the following code:
+
+cd /c/deps/libpng-1.6.15
+configure --disable-shared
+make
+cp .libs / libpng16.a .libs / libpng.a
+
+-Download http://fukuchi.org/works/qrencode/qrencode-3.4.4.tar.gz
+-Raspakuyte
+Click Run the following code to MinGW shell:
+
+cd /c/deps/qrencode-3.4.4
+
+LIBS = "../ libpng-1.6.15 / .libs / libpng.a ../../mingw32/i686-w64-mingw32/lib/libz.a" \
+png_CFLAGS = "- I ../ libpng-1.6.15" \
+png_LIBS = "- L ../ libpng-1.6.15 / .libs" \
+configure --enable-static --disable-shared --without-tools
+
+make
+
+Qt 2.5 and Qt 4 5
+Qt library will be stored in the folder C: \ Qt
+To speed up the compilation instead
+mingw32-make
+use
+mingw32-make -j n, where n is the number instead of your CPU cores
+Qt 5:
+-Download http://download.qt-project.org/official_releases/qt/5.4/5.4.0/submodules/qtbase-opensource-src-5.4.0.7z
+http://download.qt-project.org/official_releases/qt/5.4/5.4.0/submodules/qttools-opensource-src-5.4.0.7z
+http://download.qt-project.org/official_releases/qt/5.4/5.4.0/submodules/qttranslations-opensource-src-5.4.0.7z
+
+-Raspakuyte In C: \ Qt
+-Pereimenuyte Folder qtbase-opensource-src-5.4.0 to 5.4.0
+-Open A Windows command prompt and run the following code:
+
+set INCLUDE = C: \ deps \ libpng-1.6.15; C: \ deps \ openssl-1.0.2 \ include
+set LIB = C: \ deps \ libpng-1.6.15 \ .libs; C: \ deps \ openssl-1.0.2
+
+cd C: \ Qt \ 5.4.0
+
+configure.bat -release -opensource -confirm-license -static -make libs -no-sql-sqlite -no-opengl -system-zlib -qt-pcre -no-icu -no-gif -system-libpng -no-libjpeg -no-freetype -no-angle -openssl -no-dbus -no-audio-backend -no-wmf-backend -no-qml-debug
+
+mingw32-make
+
+set PATH =% PATH%; C: \ Qt \ 5.4.0 \ bin
+
+cd C: \ Qt \ qttools-opensource-src-5.4.0
+qmake qttools.pro
+mingw32-make
+
+cd C: \ Qt \ qttranslations-opensource-src-5.4.0
+qmake qttranslations.pro
+mingw32-make
+
+
+Qt4:
+-Download http://download.qt-project.org/official_releases/qt/4.8/4.8.6/qt-everywhere-opensource-src-4.8.6.zip
+-Raspakuyte In C: \ Qt
+-Pereimenuyte Folder qt-everywhere-opensource-src-4.8.6 to 4.8.6
+-Open A Windows command prompt and run the following code:
+
+cd C: \ Qt \ 4.8.6
+
+configure -release -opensource -confirm-license -static -no-sql-sqlite -no-qt3support -no-opengl -qt-zlib -no-gif -qt-libpng -qt-libmng -no-libtiff -qt-libjpeg - no-dsp -no-vcproj -no-openssl -no-dbus -no-phonon -no-phonon-backend -no-multimedia -no-audio-backend -no-webkit -no-script -no-scripttools -no- declarative -no-declarative-debug -qt-style-windows -qt-style-windowsxp -qt-style-windowsvista -no-style-plastique -no-style-cleanlooks -no-style-motif -no-style-cde - nomake demos -nomake examples
+
+mingw32-make
+
+
+3. Compilation
+We keep the source code in the folder C: \ MyProjects
+
+3.1 Download the source code
+-Zaydite Https://github.com/FedoraShare-project/FedoraShare on site
+-Press Download ZIP
+-Raspakuyte FedoraShare-master.zip in C: \ MyProjects
+
+3.2 Putting FedoraShared
+-Browse In the folder C: \ MyProjects \ FedoraShare-master \ src
+-Open Makefile.mingw file in a text editor. (When writing instructions used WordPad)
+-Add Line USE_ASM: = 1
+-Pomenyayte Current INCLUDEPATHS, LIBPATHS, LIBS on:
+
+? BOOST_SUFFIX = - mgw49-mt-s-1_57
+
+INCLUDEPATHS = \
+ -I "$ (CURDIR)" \
+ -I "/ C / deps / boost_1_57_0" \
+ -I "/ C / deps" \
+ -I "/c/deps/db-6.0.20/build_unix" \
+ -I "/c/deps/openssl-1.0.2/include"
+ 
+LIBPATHS = \
+ -L "$ (CURDIR) / leveldb" \
+ -L "/ C / deps / boost_1_57_0 / stage / lib" \
+ -L "/c/deps/db-6.0.20/build_unix" \
+ -L "/c/deps/openssl-1.0.2"
+
+LIBS = \
+  -l leveldb \
+  -l memenv \
+  -l boost_system $ (BOOST_SUFFIX) \
+  -l boost_filesystem $ (BOOST_SUFFIX) \
+  -l boost_program_options $ (BOOST_SUFFIX) \
+  -l boost_thread $ (BOOST_SUFFIX) \
+  -l boost_chrono $ (BOOST_SUFFIX) \
+  -l db_cxx \
+  -l ssl \
+  -l crypto
+
+-Pomenyayte LDFLAGS = -Wl, - dynamicbase -Wl, - nxcompat on
+LDFLAGS = -Wl, - dynamicbase -Wl, - nxcompat -Wl, - large-address-aware -static
+
+-If You want to use as the unit base LevelDB the change:
+USE_LEVELDB: = 0
+on
+USE_LEVELDB: = 1
+(Above USE_IPV6: = 1)
+Just change
+cd leveldb; make; cd ..
+on
+cd leveldb; TARGET_OS = NATIVE_WINDOWS make libleveldb.a libmemenv.a; cd ..
+
+more change
+obj / txdb-leveldb.o: leveldb / libleveldb.lib
+on
+obj / txdb-leveldb.o: leveldb / libleveldb.a
+
+
+
+If you want to use a BerkeleyDB database blocks, then simply remove the line USE_LEVELDB: = 1
+
+Save the changes makefile.mingw file
+
+-Open MinGW shell (C: \ MinGW \ msys \ 1.0 \ msys.bat) and run the following code:
+
+cd / c / MyProjects / FedoraShare-master / src
+make -f makefile.mingw
+strip FedoraShared.exe
+
+If you have an error "make: cc: Command not found", then change to the file makefile.mingw
+
+ $ (CC) $ -c (xCXXFLAGS) -MMD -o $ @ $ <
+on
+ gcc -c $ (xCXXFLAGS) -MMD -o $ @ $ <
+
+If done correctly, the FedoraShared.exe file will be located in the folder C: \ MyProjects \ FedoraShare-master \ src
+
+
+3.3 Putting FedoraShare QT
+
+Note: If you want to collect FedoraShare Qt with LevelDB, but missed a step with the assembly FedoraShared.exe, the
+-Open MinGW shell (C: \ MinGW \ msys \ 1.0 \ msys.bat) and run the following code:
+
+cd / c / myprojects / FedoraShare-master / src / leveldb
+TARGET_OS = NATIVE_WINDOWS make libleveldb.a libmemenv.a
+
+-Open The file C: \ MyProjects \ FedoraShare-master \ FedoraShare-qt.pro in a text editor (for writing instruction used WordPad)
+-Below
+# Dependency library locations can be customized with:
+# BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
+# BDB_LIB_PATH, OPENSSL_INCLUDE_PATH and OPENSSL_LIB_PATH respectively
+replace the prescribed way to dependent on
+
+BOOST_LIB_SUFFIX = -mgw49-mt-s-1_57
+BOOST_INCLUDE_PATH = C: / deps / boost_1_57_0
+BOOST_LIB_PATH = C: / deps / boost_1_57_0 / stage / lib
+BDB_INCLUDE_PATH = C: /deps/db-6.0.20/build_unix
+BDB_LIB_PATH = C: /deps/db-6.0.20/build_unix
+OPENSSL_INCLUDE_PATH = C: /deps/openssl-1.0.2/include
+OPENSSL_LIB_PATH = C: /deps/openssl-1.0.2
+QRENCODE_INCLUDE_PATH = C: /deps/qrencode-3.4.4
+QRENCODE_LIB_PATH = C: /deps/qrencode-3.4.4/.libs
+
+Just change (if you have not changed)
+LIBS = -lshlwapi
+genleveldb.commands = cd $$ PWD / src / leveldb && CC = $$ QMAKE_CC CXX = $$ QMAKE_CXX TARGET_OS = OS_WINDOWS_CROSSCOMPILE $ (MAKE) OPT = \ "$$ QMAKE_CXXFLAGS $$ QMAKE_CXXFLAGS_RELEASE \" libleveldb.a libmemenv.a && $ $ QMAKE_RANLIB $$ PWD / src / leveldb / libleveldb.a && $$ QMAKE_RANLIB $$ PWD / src / leveldb / libmemenv.a
+
+on
+ 
+LIBS = -lshlwapi
+# Genleveldb.commands = cd $$ PWD / src / leveldb && CC = $$ QMAKE_CC CXX = $$ QMAKE_CXX TARGET_OS = OS_WINDOWS_CROSSCOMPILE $ (MAKE) OPT = \ "$$ QMAKE_CXXFLAGS $$ QMAKE_CXXFLAGS_RELEASE \" libleveldb.a libmemenv.a && $$ QMAKE_RANLIB $$ PWD / src / leveldb / libleveldb.a && $$ QMAKE_RANLIB $$ PWD / src / leveldb / libmemenv.a
+
+If the file does not contain a line CONFIG = static, then add it.
+
+Change
+win32: QMAKE_LFLAGS ........................
+on
+win32: QMAKE_LFLAGS * = -Wl, - large-address-aware -static
+
+Change
+windows: LIBS = -lboost_chrono $$ BOOST_LIB_SUFFIX -Wl, -Bstatic -lpthread -Wl, -Bdynamic
+on
+windows: LIBS = -lboost_chrono $$ BOOST_LIB_SUFFIX
+
+Save the changes file FedoraShare-qt.pro
+-Open A Windows command prompt and run the following code:
+
+Qt5 BDB transactional index
+
+set PATH =% PATH%; C: \ Qt \ 5.4.0 \ bin
+cd C: \ MyProjects \ FedoraShare-master
+qmake "USE_IPV6 = 1" "USE_ASM = 1" FedoraShare-qt.pro
+mingw32-make -f Makefile.Release
+
+
+Qt5 transactional index LevelDB
+
+set PATH =% PATH%; C: \ Qt \ 5.4.0 \ bin
+cd C: \ MyProjects \ FedoraShare-master
+qmake "USE_IPV6 = 1" "USE_LEVELDB = 1" "USE_ASM = 1" FedoraShare-qt.pro
+mingw32-make -f Makefile.Release
+
+Qt4 BDB transactional index
+
+set PATH =% PATH%; C: \ Qt \ 4.8.6 \ bin
+cd C: \ MyProjects \ FedoraShare-master
+qmake "USE_IPV6 = 1" "USE_ASM = 1" FedoraShare-qt.pro
+mingw32-make -f Makefile.Release
+
+Qt4 transactional index LevelDB
+
+set PATH =% PATH%; C: \ Qt \ 4.8.6 \ bin
+cd C: \ MyProjects \ FedoraShare-master
+qmake "USE_IPV6 = 1" "USE_LEVELDB = 1" "USE_ASM = 1" FedoraShare-qt.pro
+mingw32-make -f Makefile.Release
+
+
+
+If done correctly, the FedoraShare-qt.exe file will be located in the folder C: \ MyProjects \ FedoraShare-master \ release
+
+If you want to reduce the size of binary files,
+1) Visit the website http://upx.sourceforge.net/#downloadupx
+2) Download the program in accordance with your system
+3) Extract the program to a folder with binary files FedoraShare.
+4) Enter the console
+upx -9 FedoraShared.exe
+then
+upx -9 FedoraShare-qt.exe
+
+And your FedoraShared and FedoraShare-qt will be less than ~ 3 times.
+
+
+
+64 bit:
+1.1 As bit 32
+
+1.2 As bit 32
+
+1.3 Installing MinGW-builds project toolchain:
+download http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.2/threads-posix/seh/x86_64-4.9.2-release-posix-seh-rt_v3-rev0.7z/download
+and unzip to C: \
+
+1.4 Remove from the PATH path C: \ mingw32 \ bin; and add the path to the PATH C: \ mingw64 \ bin;
+
+Check that you did everything right:
+1) C: \ MinGW \ bin should contain only mingw-get.exe file
+2) Open the Command Prompt (Press Windows R button at the same time. This will open the window "Run" in the Open box, type the cmd. Click the Ok). Type gcc -v. At the command prompt will be printed text. At the end of the text should be written:
+Thread model: posix
+gcc version 4.9.2 (x86_64-posix-seh-rev0, Built by MinGW-W64 project)
+
+2. Building dependency.
+The instruction dependencies are stored in the folder c: \ deps \ x64
+
+2.1 OpenSSL: http://www.openssl.org/source/openssl-1.0.2.tar.gz
+-Browse In the folder C: \ MinGW \ msys \ 1.0 and run msys.bat
+From MinGw shell run the following code:
+
+cd / c / deps / x64 /
+tar xvfz openssl-1.0.2.tar.gz
+cd openssl-1.0.2
+Configure no-shared no-dso mingw64
+make
+
+2.2 As well as a 32 bit, only cd / c / deps / changes to cd / c / deps / x64 /
+
+2.3 As well as a 32 bit, only decompress in C: \ deps \ x64 and command cd C: \ deps \ boost_1_57_0 \ changes to cd C: \ deps \ x64 \ boost_1_57_0 \
+
+2.4 Part with libpng as well as 32 bit, only decompress in C: \ deps \ x64
+Then
+-Download http://fukuchi.org/works/qrencode/qrencode-3.4.4.tar.gz
+-Raspakuyte In C: \ deps \ x64
+Click Run the following code to MinGW shell:
+
+cd /c/deps/x64/qrencode-3.4.4
+
+LIBS = "../ libpng-1.6.15 / .libs / libpng.a ../../../mingw64/x86_64-w64-mingw32/lib/libz.a" \
+png_CFLAGS = "- I ../ libpng-1.6.15" \
+png_LIBS = "- L ../ libpng-1.6.15 / .libs" \
+configure --enable-static --disable-shared --without-tools
+
+make
+
+
+Qt 2.5 and Qt 4 5
+Qt library will be stored in the folder C: \ Qt
+To speed up the compilation instead
+mingw32-make
+use
+mingw32-make -j n, where n is the number instead of your CPU cores
+Qt 5:
+-Download http://download.qt-project.org/official_releases/qt/5.4/5.4.0/submodules/qtbase-opensource-src-5.4.0.7z
+http://download.qt-project.org/official_releases/qt/5.4/5.4.0/submodules/qttools-opensource-src-5.4.0.7z
+http://download.qt-project.org/official_releases/qt/5.4/5.4.0/submodules/qttranslations-opensource-src-5.4.0.7z
+-Raspakuyte In C: \ Qt
+-Pereimenuyte Folder qtbase-opensource-src-5.4.0 to 5.4.0-x64
+-Pereimenuyte Folder qttools-opensource-src-5.4.0 in qttools-opensource-src-5.4.0-x64
+-Pereimenuyte Folder qttranslations-opensource-src-5.4.0 in qttranslations-opensource-src-5.4.0-x64
+-Open A Windows command prompt and run the following code:
+
+set INCLUDE = C: \ deps \ x64 \ libpng-1.6.15; C: \ deps \ x64 \ openssl-1.0.2 \ include
+set LIB = C: \ deps \ x64 \ libpng-1.6.15 \ .libs; C: \ deps \ x64 \ openssl-1.0.2
+
+cd C: \ Qt \ 5.4.0-x64
+
+configure.bat -release -opensource -confirm-license -static -make libs -no-sql-sqlite -no-opengl -system-zlib -qt-pcre -no-icu -no-gif -system-libpng -no-libjpeg -no-freetype -no-angle -openssl -no-dbus -no-audio-backend -no-wmf-backend -no-qml-debug
+
+mingw32-make
+
+set PATH =% PATH%; C: \ Qt \ 5.4.0-x64 \ bin
+
+cd C: \ Qt \ qttools-opensource-src-5.4.0-x64
+qmake qttools.pro
+mingw32-make
+
+cd C: \ Qt \ qttranslations-opensource-src-5.4.0-x64
+qmake qttranslations.pro
+mingw32-make
+
+Qt4:
+-Download http://download.qt-project.org/official_releases/qt/4.8/4.8.6/qt-everywhere-opensource-src-4.8.6.zip
+-Raspakuyte In C: \ Qt
+-Pereimenuyte Folder qt-everywhere-opensource-src-4.8.6 to 4.8.6-x64
+-Open A Windows command prompt and run the following code:
+
+configure -release -opensource -confirm-license -static -no-sql-sqlite -no-qt3support -no-opengl -qt-zlib -no-gif -qt-libpng -qt-libmng -no-libtiff -qt-libjpeg - no-dsp -no-vcproj -no-openssl -no-dbus -no-phonon -no-phonon-backend -no-multimedia -no-audio-backend -no-webkit -no-script -no-scripttools -no- declarative -no-declarative-debug -qt-style-windows -qt-style-windowsxp -qt-style-windowsvista -no-style-plastique -no-style-cleanlooks -no-style-motif -no-style-cde - nomake demos -nomake examples
+
+mingw32-make
+
+3. Compilation
+We keep the source code in the folder C: \ MyProjects
+
+3.1 As bit 32
+
+3.2 Putting FedoraShared
+-Change Makefile.mingw as well as 32 bit
+-Open Makefile.mingw file in a text editor and save it as makefile.ming64
+-Change In INCLUDEPATHS and LIBPATHS / c / deps / to / c / deps / x64 /
+-Change
+LDFLAGS = -Wl, - dynamicbase -Wl, - nxcompat -Wl, - large-address-aware -static
+on
+LDFLAGS = -Wl, - dynamicbase -Wl, - nxcompat -Wl, -static, -static-libgcc
+-Remove (If any) obj (.o) files from the C: \ MyProjects \ FedoraShare-master \ src \ obj, if the left after 32 bit
+-Remove (If any) libleveldb.a and libmemenv.a in the folder C: \ MyProjects \ FedoraShare-master \ src \ leveldb
+-Remove (If any) obj (.o) files from
+C: \ MyProjects \ FedoraShare-master \ src \ leveldb \ db
+C: \ MyProjects \ FedoraShare-master \ src \ leveldb \ helpers \ memenv
+C: \ MyProjects \ FedoraShare-master \ src \ leveldb \ port
+C: \ MyProjects \ FedoraShare-master \ src \ leveldb \ table
+C: \ MyProjects \ FedoraShare-master \ src \ leveldb \ util
+-Open MinGW shell (C: \ MinGW \ msys \ 1.0 \ msys.bat) and run the following code:
+
+cd / c / MyProjects / FedoraShare-master / src
+make -f makefile.mingw64
+strip FedoraShared.exe
+
+If done correctly, the FedoraShared.exe file will be located in the folder C: \ MyProjects \ FedoraShare-master \ src
+
+
+3.3 Putting FedoraShare QT
+Note: If you want to collect FedoraShare Qt with LevelDB, but missed a step with the assembly FedoraShared.exe, the
+-Remove (If any) libleveldb.a and libmemenv.a in the folder C: \ MyProjects \ FedoraShare-master \ src \ leveldb
+-Remove (If any) obj (.o) files from
+C: \ MyProjects \ FedoraShare-master \ src \ leveldb \ db
+C: \ MyProjects \ FedoraShare-master \ src \ leveldb \ helpers \ memenv
+C: \ MyProjects \ FedoraShare-master \ src \ leveldb \ port
+C: \ MyProjects \ FedoraShare-master \ src \ leveldb \ table
+C: \ MyProjects \ FedoraShare-master \ src \ leveldb \ util
+-Open MinGW shell (C: \ MinGW \ msys \ 1.0 \ msys.bat) and run the following code:
+
+cd / c / myprojects / FedoraShare-master / src / leveldb
+TARGET_OS = NATIVE_WINDOWS make libleveldb.a libmemenv.a
+
+-Change FedoraShare-qt.pro file as well as 32 bit
+-Open FedoraShare-qt.pro file in a text editor and save it as FedoraShare-qt64.pro
+-Replace In INCLUDE and LIB paths text C: / deps on the text of the C: / deps / x64 (ie instead of the C: / deps / boost_1_57_0 need to C: / deps / x64 / boost_1_57_0 etc.)
+-Replace
+win32: QMAKE_LFLAGS * = -Wl, - large-address-aware -static
+on
+win32: QMAKE_LFLAGS * = -Wl, -static
+
+-Open A Windows command prompt and run the following code:
+
+Qt5 BDB transactional index
+
+set PATH =% PATH%; C: \ Qt \ 5.4.0-x64 \ bin
+cd C: \ MyProjects \ FedoraShare-master
+qmake "USE_IPV6 = 1" "USE_ASM = 1" FedoraShare-qt64.pro
+mingw32-make -f Makefile.Release
+
+
+Qt5 transactional index LevelDB
+
+set PATH =% PATH%; C: \ Qt \ 5.4.0-x64 \ bin
+cd C: \ MyProjects \ FedoraShare-master
+qmake "USE_IPV6 = 1" "USE_LEVELDB = 1" "USE_ASM = 1" FedoraShare-qt64.pro
+mingw32-make -f Makefile.Release
+
+Qt4 BDB transactional index
+
+set PATH =% PATH%; C: \ Qt \ 4.8.6-x64 \ bin
+cd C: \ MyProjects \ FedoraShare-master
+qmake "USE_IPV6 = 1" "USE_ASM = 1" FedoraShare-qt64.pro
+mingw32-make -f Makefile.Release
+
+Qt4 transactional index LevelDB
+
+set PATH =% PATH%; C: \ Qt \ 4.8.6-x64 \ bin
+cd C: \ MyProjects \ FedoraShare-master
+qmake "USE_IPV6 = 1" "USE_LEVELDB = 1" "USE_ASM = 1" FedoraShare-qt64.pro
+mingw32-make -f Makefile.Release
+
+If done correctly, the FedoraShare-qt.exe file will be located in the folder C: \ MyProjects \ FedoraShare-master \ release
+
+If you want to reduce the size of binary files,
+1) Visit the website http://upx.sourceforge.net/#downloadupx
+2) Download the program in accordance with your system
+3) Extract the program to a folder with binary files FedoraShare.
+4) Enter the console
+upx -9 FedoraShared.exe
+then
+upx -9 FedoraShare-qt.exe
+
+And your FedoraShared and FedoraShare-qt will be less than ~ 3 times.

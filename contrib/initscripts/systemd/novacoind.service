@@ -1,0 +1,11 @@
+[Unit]
+Description=FedoraShare daemon serivce
+After=network.target
+
+[Service]
+Type=simple
+User=FedoraShare
+ExecStart=/opt/FedoraShare/FedoraShared
+
+[Install]
+WantedBy=multi-user.target

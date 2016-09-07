@@ -1,0 +1,51 @@
+﻿Build for Linux
+If you prefer to compile your own binaries, then you need development packages:
+
+Ubuntu / Debian:
+ sudo apt-get install git qt4-qmake libqt4-dev build-essential libboost-dev libboost-system-dev
+   libboost-filesystem-dev libboost-program-options-dev libboost-thread-dev
+   libssl-dev libdb ++ - dev libqrencode-dev
+
+If you experience an error when you install qt4-qmake (Occurs on Ubuntu 14.04.2, and possibly in other versions)
+libcheese-gtk23: Depends: libclutter-gtk-1.0-0 (> = 0.91.8) but it is not going to be installed
+                  Depends: libcogl15 (> = 1.15.8) but it is not going to be installed
+libcheese7: Depends: libclutter-gst-2.0-0 (> = 0.10.0) but it is not going to be installed
+             Depends: gstreamer1.0-clutter but it is not going to be installed
+libclutter-1.0-0: Depends: libcogl-pango15 (> = 1.15.8) but it is not going to be installed
+                   Depends: libcogl15 (> = 1.15.8) but it is not going to be installed
+
+Then type
+sudo apt-get install libglew-dev libcheese7 libcheese-gtk23 libclutter-gst-2.0-0 libcogl15 libclutter-gtk-1.0-0 libclutter-1.0-0 xserver-xorg-input-all
+
+openSUSE (tested on version 13.2):
+ sudo zypper install git gcc gcc-c ++ libqt4-devel boost-devel libopenssl-devel libdb-4_8-devel libqrencode3
+
+After the installation is complete, you can clone a repository FedoraShare
+
+ git clone https://github.com/FedoraShare-project/FedoraShare.git
+
+and finally to compile your client
+
+ cd FedoraShare
+ qmake USE_O3 = 1 USE_ASM = 1 (if you want LevelDB, the USE_LEVELDB = 1)
+ make
+ cd src
+ make -f makefile.unix USE_O3 = 1 USE_ASM = 1 (if you want LevelDB, the USE_LEVELDB = 1)
+ strip FedoraShared
+
+Teams above compiled binary files with dynamic linking, if you want to static linking, and your distribution includes a static library (.a, .so instead), add:
+-to command qmake:
+ RELEASE = 1
+-to command make -f makefile.unix:
+ STATIC = 1
+
+If you want to reduce the size of binary files,
+1) Visit the website http://upx.sourceforge.net/#downloadupx
+2) Download the program in accordance with your system
+3) Extract the program to a folder with binary files FedoraShare.
+4) Type in the terminal
+./upx -9 FedoraShared
+then
+./upx -9 FedoraShare-qt
+
+And your FedoraShared and FedoraShare-qt will be less than ~ 3 times.

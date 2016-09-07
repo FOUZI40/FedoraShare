@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=FedoraShare
+Comment=FedoraShare P2P Cryptocurrency
+Comment[ru]=FedoraShare, P2P криптовалюта
+Comment[fr]=FedoraShare, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=FedoraShare, eşten eşe kriptografik sanal para birimi
+Exec=/usr/bin/FedoraShare-qt
+Terminal=false
+Type=Application
+Icon=/usr/share/pixmaps/FedoraShare80.xpm
+MimeType=x-scheme-handler/FedoraShare;
+Categories=Office;
